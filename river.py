@@ -14,7 +14,7 @@ If the goat and the cabbage are alone on the shore, the goat will eat the cabbag
 How can the farmer efficiently bring the wolf, the goat and the cabbage across the river without anything being eaten?
 """
 
-PromptType = Literal["raw", "cot", "rb"]
+PromptType = Literal["raw", "cot", "rb", "rb-zero"]
 
 
 @tenacity.retry(
@@ -37,6 +37,13 @@ async def run_experiment(
         messages = [{"role": "user", "content": RIDDLE}]
     elif prompt_type == "cot":
         messages = [{"role": "user", "content": f"{RIDDLE}\nThink step-by-step."}]
+    elif prompt_type == "rb-zero":
+        messages = [
+            {
+                "role": "user",
+                "content": f"{RIDDLE}\nBut before you do, please explain the task that I've asked you to perform to confirm your understanding, and then proceed with solving it within the same response.",
+            }
+        ]
     else:  # rb case
         # First, get the repeat back
         messages = [
@@ -71,7 +78,7 @@ async def main():
 
     # Create all experiment tasks
     tasks = []
-    for prompt_type in ["raw", "cot", "rb"]:
+    for prompt_type in ["raw", "cot", "rb", "rb-zero"]:
         for i in range(50):
             tasks.append(run_experiment(prompt_type, i, client))
 
